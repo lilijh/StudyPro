@@ -1,0 +1,40 @@
+server:
+  servlet:
+    context-path: /content
+  port: 63040
+#微服务配置
+spring:
+  application:
+    name: content-api
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/studyonline?serverTimezone=UTC&userUnicode=true&useSSL=false&
+    username: root
+    password: 123
+  mvc:
+    pathmatch:
+     matching-strategy: ANT_PATH_MATCHER
+# 日志文件配置路径
+logging:
+  config: classpath:log4j2-dev.xml
+# swagger 文档配置
+#  运行启动类。
+#  工程启动起来，访问http://localhost:63040/content/swagger-ui.html查看接口信息
+#  2.2.3.3 Swagger介绍
+#  上节最后打开的是一个在线的接口文档，它是由Swaager生成的。
+#  什么是Swagger？
+#  OpenAPI规范（OpenAPI Specification 简称OAS）是Linux基金会的一个项目，试图通过定义一种用
+#  来描述API格式或API定义的语言，来规范RESTful服务开发过程，目前版本是V3.0，并且已经发布并开
+#  源在github上。
+#  （https://github.com/OAI/OpenAPI-Specification）
+#  Swagger是全球最大的OpenAPI规范（OAS）API开发工具框架，Swagger是一个在线接口文档的生
+#  成工具，前后端开发人员依据接口文档进行开发。 (https://swagger.io/)
+#  只要添加Swagger的依赖和配置信息即可使用它。
+#  在 bootstrap.yml中配置
+#  base-package为扫描的包路径，扫描Controller类。
+swagger:
+  title: "学成在线内容管理系统"
+  description: "内容系统管理系统对课程相关信息进行业务管理数据"
+  base-package: com.studyonline.content
+  enabled: true
+  version: 1.0.0

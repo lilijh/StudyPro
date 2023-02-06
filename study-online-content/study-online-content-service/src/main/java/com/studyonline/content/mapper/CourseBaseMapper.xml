@@ -29,4 +29,10 @@
         id, company_id, company_name, name, users, tags, mt, st, grade, teachmode, description, pic, create_date, change_date, create_people, change_people, audit_status, status
     </sql>
 
+    <select id="selectO" parameterType="Long" resultType="com.studyonline.content.model.po.CourseBase">
+        select *
+        from course_base
+        where id = #{id};
+    </select>
+
 </mapper>

@@ -6,14 +6,15 @@ server:
 spring:
   application:
     name: content-api
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/studyonline?serverTimezone=UTC&userUnicode=true&useSSL=false&
-    username: root
-    password: 123
   mvc:
     pathmatch:
-     matching-strategy: ANT_PATH_MATCHER
+      matching-strategy: ant_path_matcher
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://127.0.0.1:3306/studyonline?serverTimezone=UTC&userUnicode=true&useSSL=false&
+#    username: root
+#    password: 123
+
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml

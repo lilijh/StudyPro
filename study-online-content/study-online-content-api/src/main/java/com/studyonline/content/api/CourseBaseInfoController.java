@@ -20,8 +20,6 @@ public class CourseBaseInfoController {
     @Resource
     CourseBaseInfoService courseBaseInfoService;
 
-
-
     @ApiOperation("课程查询接口")
     @PostMapping("/course/list")
     public PageResult<CourseBase> list(PageParams pageParams, @RequestBody QueryCourseParamsDto queryCourseParamsDto){

@@ -2,29 +2,37 @@ package com.studyonline.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.studyonline.base.exception.StudyOnlineException;
 import com.studyonline.base.model.PageParams;
 import com.studyonline.base.model.PageResult;
 import com.studyonline.content.mapper.CourseBaseMapper;
+import com.studyonline.content.mapper.CourseCategoryMapper;
+import com.studyonline.content.mapper.CourseMarketMapper;
+import com.studyonline.content.model.dto.AddCourseDto;
+import com.studyonline.content.model.dto.CourseBaseInfoDto;
 import com.studyonline.content.model.dto.QueryCourseParamsDto;
 import com.studyonline.content.model.po.CourseBase;
+import com.studyonline.content.model.po.CourseCategory;
+import com.studyonline.content.model.po.CourseMarket;
 import com.studyonline.content.service.CourseBaseInfoService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 
-/**
- * @description 课程基本信息管理业务接口
- * @author Mr.M
- * @date 2022/9/6 21:42
- * @version 1.0
- */
 @Service
 public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
 
     @Resource
     CourseBaseMapper courseBaseMapper;
+    @Resource
+    CourseMarketMapper courseMarketMapper;
+    @Resource
+    CourseCategoryMapper courseCategoryMapper;
 
     @Override
     public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDto queryCourseParamsDto) {
@@ -47,6 +55,62 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         // 构建结果集
         PageResult<CourseBase> courseBasePageResult = new PageResult<>(list, total, pageParams.getPageNo(), pageParams.getPageSize());
         return courseBasePageResult;
+    }
+
+    @Override
+    @Transactional
+    public CourseBaseInfoDto createCourseBase(Long companyId, AddCourseDto addCourseDto) {
+        CourseBase course = new CourseBase();
+        BeanUtils.copyProperties(addCourseDto,course);
+        course.setAuditStatus("202002");
+        course.setStatus("203001");
+        course.setCompanyId(companyId);
+        int insert = courseBaseMapper.insert(course);
+        Long courseId = course.getId();
+        CourseMarket courseMarket = new CourseMarket();
+        BeanUtils.copyProperties(addCourseDto,courseMarket);
+        courseMarket.setId(courseId);
+        String charge = addCourseDto.getCharge();
+        if (charge.equals("201001")){
+            Float price = addCourseDto.getPrice();
+            if (price == null || price.floatValue() <= 0){
+                throw new StudyOnlineException("课程设置了收费价格不能为空且必须大于0");
+            }
+        }
+        //插入课程营销信息
+        int insert1 = courseMarketMapper.insert(courseMarket);
+        if(insert<=0 || insert1<=0){
+            throw new RuntimeException("新增课程基本信息失败");
+        }
+        //添加成功
+        //返回添加的课程信息
+        return getCourseBaseInfo(courseId);
+    }
+
+    /**
+     * 构造响应对象
+     * @param courseId
+     * @return CourseBaseInfoDto
+     */
+    public CourseBaseInfoDto getCourseBaseInfo(long courseId){
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
+        if(courseBase == null){
+            return null;
+        }
+        CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
+        BeanUtils.copyProperties(courseBase,courseBaseInfoDto);
+        if(courseMarket != null){
+            BeanUtils.copyProperties(courseMarket,courseBaseInfoDto);
+        }
+        //查询分类名称
+        CourseCategory courseCategoryBySt =
+                courseCategoryMapper.selectById(courseBase.getSt());
+        courseBaseInfoDto.setStName(courseCategoryBySt.getName());
+        CourseCategory courseCategoryByMt =
+                courseCategoryMapper.selectById(courseBase.getMt());
+        courseBaseInfoDto.setMtName(courseCategoryByMt.getName());
+        return courseBaseInfoDto;
     }
 
 }
